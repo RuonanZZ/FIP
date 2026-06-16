@@ -7,7 +7,7 @@ from Aplus.tools.functions import *
 
 seq_len = 128
 use_elbow_angle = True
-data_type = 'S03'
+data_type = 'S01'
 evaluator = PoseEvaluatorWithStd()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

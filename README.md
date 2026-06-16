@@ -11,7 +11,9 @@ This repository contains the implementation of our CHI 2025 paper, *FIP: Endowin
 ## Dataset
 
 The FIP dataset is available at:
-https://drive.google.com/drive/folders/1cdiN57Q80aBQ0xb7fL7qXd3fEYojTCD-?usp=sharing
+Google Drive: https://drive.google.com/drive/folders/1cdiN57Q80aBQ0xb7fL7qXd3fEYojTCD-?usp=sharing
+
+Baidu Cloud: https://pan.baidu.com/s/1nglC47RSOrydHtGYD8ChEQ?pwd=w8nd
 
 See [docs/FIP_Dataset.md](./docs/FIP_Dataset.md) for details.
 

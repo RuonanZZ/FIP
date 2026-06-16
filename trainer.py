@@ -202,7 +202,7 @@ class PoseEvaluatorWithStd:
         print(f"Angular Error: {format(per_joint_err.norm(dim=-1).mean(), '.2f')} ± {format(per_joint_err.norm(dim=-1).mean(dim=-1).std(), '.2f')}")
         print(f"Elbow Angular Error: {format(per_joint_err[:, -2:,].norm(dim=-1).mean(), '.2f')} ± {format(per_joint_err[:, -2:,].norm(dim=-1).std(), '.2f')}")
         print(f"Positional Error: {format(position_err.mean(), '.2f')} ± {format(position_err.std(), '.2f')}")
-        print(f"Jitters: {format(jitter.mean(), '.2f')}")
+        print(f"Jitter: {format(jitter.mean(), '.2f')}")
         return per_joint_err.norm(dim=-1).mean(dim=-1), per_joint_err[:, -2:,].norm(dim=-1).mean(dim=-1), position_err, jitter.mean(dim=-1)
 
 
