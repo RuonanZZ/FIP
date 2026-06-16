@@ -6,7 +6,7 @@ def trainVAE(model, data_train, data_test, num_epochs=10):
     optimizer = torch.optim.Adam(list(model.encoder.parameters()) + list(model.decoder.parameters()), lr=1e-3)
     model.encoder.train()
     model.decoder.train()
-    model.diffusion.eval()  # 冻结 diffusion model
+    model.diffusion.eval()  # Freeze the diffusion model.
 
     trainer = VAETrainer(model=model, data=data_train, optimizer=optimizer, batch_size=512)
     evaluator = VAEEvaluator.from_trainner(trainer, data_eval=data_test)
@@ -23,8 +23,8 @@ def trainVAE(model, data_train, data_test, num_epochs=10):
 
 def trainDiffusion(model, data_train, data_test, criterion, num_epochs=10):
     optimizer = torch.optim.Adam(model.diffusion.parameters(), lr=1e-3)
-    model.encoder.eval()  # 冻结 encoder
-    model.decoder.eval()  # 冻结 decoder
+    model.encoder.eval()  # Freeze the encoder.
+    model.decoder.eval()  # Freeze the decoder.
     model.diffusion.train()
 
     trainer = DiffusionTrainer(model=model, data=data_train, optimizer=optimizer, batch_size=512, loss_func=criterion)

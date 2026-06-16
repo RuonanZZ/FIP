@@ -1,9 +1,15 @@
 import torch
 from articulate.math.angular import normalize_tensor
 import trimesh
+import os
+
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ASSETS_DIR = os.path.join(ROOT_DIR, 'assets')
+TPOSE_GARMENT_PATH = os.path.join(ASSETS_DIR, 'T-Pose_garment.obj')
 
 class garment_imu_set:
-    # 起点/终点
+    # Start/end vertices used to define each IMU axis.
     imu_axis = {'left' :{'axis_1':[916, 4795],  'axis_2':[4796, 4828], 'order':'zx'},
                 'right':{'axis_1':[8504, 2109], 'axis_2':[8529, 8369], 'order':'zx'},
                 'back' :{'axis_1':[7916, 6021], 'axis_2':[6022, 1226], 'order':'xy'},
@@ -58,7 +64,7 @@ def imu_syn(garment_vertices):
     imu_rot = []
     imu_position = []
     for key, value in garment_imu_set.imu_axis.items():
-        # 通过顶点坐标计算坐标轴朝向
+        # Estimate axis directions from garment vertex coordinates.
         axis_1 = torch.tensor(garment_vertices[value['axis_1'][1]] - garment_vertices[value['axis_1'][0]]).float()
         axis_2 = torch.tensor(garment_vertices[value['axis_2'][1]] - garment_vertices[value['axis_2'][0]]).float()
 
@@ -75,7 +81,7 @@ def imu_syn(garment_vertices):
     return torch.cat(imu_rot, dim=0).unsqueeze(0), torch.cat(imu_position, dim=0).unsqueeze(0)
 
 
-def obj_load_vertices(path='./T-Pose_garment.obj'):
+def obj_load_vertices(path=TPOSE_GARMENT_PATH):
     from pywavefront import Wavefront
     import numpy as np
     obj = Wavefront(path)

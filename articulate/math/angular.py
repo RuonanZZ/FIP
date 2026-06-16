@@ -1,4 +1,4 @@
-r"""
+﻿r"""
     Angular math utils that contain calculations of angles.
 """
 
@@ -8,6 +8,7 @@ __all__ = ['RotationRepresentation', 'to_rotation_matrix', 'radian_to_degree', '
            'axis_angle_to_rotation_matrix', 'rotation_matrix_to_axis_angle', 'r6d_to_rotation_matrix',
            'rotation_matrix_to_r6d', 'quaternion_to_axis_angle', 'axis_angle_to_quaternion',
            'quaternion_to_rotation_matrix', 'rotation_matrix_to_euler_angle', 'euler_angle_to_rotation_matrix',
+           'rotation_matrix_to_axis_angle_torch',
            'rotation_matrix_to_euler_angle_np', 'euler_angle_to_rotation_matrix_np', 'euler_convert_np']
 
 
@@ -94,13 +95,9 @@ def angle_between(rot1: torch.Tensor, rot2: torch.Tensor, rep=RotationRepresenta
     """
     rot1 = to_rotation_matrix(rot1, rep)
     rot2 = to_rotation_matrix(rot2, rep)
-    # rot1 = rotation_matrix_to_axis_angle(rot1)
-    # rot2 = rotation_matrix_to_axis_angle(rot2)
-    # angles = rot1-rot2
 
     offsets = rot1.transpose(1, 2).bmm(rot2)
     angles = rotation_matrix_to_axis_angle(offsets)
-    # angles = rotation_matrix_to_axis_angle(offsets).norm(dim=1)
     return angles
 
 
@@ -169,6 +166,25 @@ def rotation_matrix_to_axis_angle(r: torch.Tensor):
     result = [cv2.Rodrigues(_)[0] for _ in r.clone().detach().cpu().view(-1, 3, 3).numpy()]
     result = torch.from_numpy(np.stack(result)).float().squeeze(-1).to(r.device)
     return result
+
+
+def rotation_matrix_to_axis_angle_torch(R: torch.Tensor):
+    r"""
+    Turn rotation matrices into axis-angle vectors with torch-only ops. (torch, batch)
+
+    :param R: Rotation matrix tensor that can reshape to [batch_size, 3, 3].
+    :return: Axis-angle tensor of shape [batch_size, 3].
+    """
+    diag = torch.cat([R[:, 0, [0]], R[:, 1, [1]], R[:, 2, [2]],], dim=-1)
+    theta = torch.acos(torch.clamp(0.5 * (diag.sum(-1) - 1), -1.0, 1.0))
+    axis = torch.stack([
+        R[:, 2, 1] - R[:, 1, 2],
+        R[:, 0, 2] - R[:, 2, 0],
+        R[:, 1, 0] - R[:, 0, 1],
+    ], dim=-1)
+    axis = axis / axis.norm(dim=-1, keepdim=True).clamp(min=1e-8)
+
+    return axis * theta.unsqueeze(-1)
 
 
 def r6d_to_rotation_matrix(r6d: torch.Tensor):

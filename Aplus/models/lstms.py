@@ -75,15 +75,19 @@ class EasyLSTM(BaseModel):
         x = self.fc_1(x)
         x = self.dropout(x)
         x = self.relu(x)
+        x = x.contiguous()
+        self.lstm.flatten_parameters()
 
         if len(args) > 0:
             h_0, c_0 = args
+            h_0 = h_0.contiguous()
+            c_0 = c_0.contiguous()
             seq_output, (h_n, c_n) = self.lstm(x, (h_0, c_0))
             seq_output = self.fc_2(seq_output)
             return seq_output, h_n, c_n
         else:
-            h_0 = self.h_0.repeat(1, x.shape[0], 1)
-            c_0 = self.c_0.repeat(1, x.shape[0], 1)
+            h_0 = self.h_0.repeat(1, x.shape[0], 1).contiguous()
+            c_0 = self.c_0.repeat(1, x.shape[0], 1).contiguous()
             seq_output, (h_n, c_n) = self.lstm(x, (h_0, c_0))
             seq_output = self.fc_2(seq_output)
             return seq_output

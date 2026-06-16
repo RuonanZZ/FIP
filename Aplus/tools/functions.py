@@ -9,6 +9,12 @@ import torch
 from articulate.evaluator import r6d_to_rotation_matrix, rotation_matrix_to_axis_angle
 import articulate as art
 
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ASSETS_DIR = os.path.join(ROOT_DIR, 'assets')
+SMPL_MODEL_PATH = os.path.join(ASSETS_DIR, 'SMPL_MALE.pkl')
+
+
 class ReverseLayerF(Function):
 
     @staticmethod
@@ -25,7 +31,7 @@ class ReverseLayerF(Function):
 
 class GradientReverseFunction(Function):
     """
-    重写自定义的梯度计算方式
+    Custom gradient reversal implementation.
     """
     @staticmethod
     def forward(ctx: Any, input: torch.Tensor, coeff: Optional[float] = 1.) -> torch.Tensor:
@@ -40,11 +46,11 @@ class GradientReverseFunction(Function):
 
 # def plot_confusion_matrix(domain_predict, label, model_name, epoch):
 #     """
-#     绘制混淆矩阵并保存图像
+#     Plot the confusion matrix and save the figure.
 #     Args:
-#         domain_predict: 域预测结果
-#         label: 数据label
-#         name: 保存文件名称
+#         domain_predict: Domain prediction results.
+#         label: Ground-truth labels.
+#         name: Output filename.
 #     """
 #     path = f"./output/{model_name}"
 #     if not os.path.exists(path):
@@ -103,7 +109,7 @@ def pose_caculate_elbow_angle(pose_data:torch.Tensor, encode=True):
     index_joint=[3, 6, 9, 13, 14, 16, 17, 18, 19, 20, 21]
     index_pose=[0, 3, 6, 9, 13, 14, 16, 17, 18, 19]
     joint_num = len(index_pose)
-    body_model = art.ParametricModel('E:\H+\Leizu4.1+数据集\smpl\smpl/SMPL_MALE.pkl', device=device)
+    body_model = art.ParametricModel(SMPL_MODEL_PATH, device=device)
 
     pose_data = pose_data.reshape(-1, 60)
     pose_data = pose_data.reshape(-1, 6)

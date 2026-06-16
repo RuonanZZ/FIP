@@ -39,7 +39,7 @@ class BaseTrainer:
         checkpoint_dict = CheckPoint.load(file_path=checkpoint_path)
         self.model.load_state_dict(checkpoint_dict['model'])
         if load_optimizer:
-            # 如果有多个optimizer按list存储 逐个恢复
+            # Restore each optimizer separately when multiple optimizers are stored.
             if isinstance(checkpoint_dict['optimizer'], list):
                 for i, optim in self.optimizer:
                     optim.load_state_dict(checkpoint_dict['optimizer'][i])
@@ -68,15 +68,15 @@ class BaseTrainer:
         data_loader = DataLoader(dataset=self.data, batch_size=self.batch_size, shuffle=data_shuffle,
                                        drop_last=False)
 
-        # 获取当前模型所在device
+        # Get the device where the current model lives.
         device = self.get_model_device()
 
-        # AverageMeter用于计算整个epoch的loss
+        # Track the average loss over the full epoch.
         avg_meter_loss = DataMeter()
 
         for e in range(epoch):
 
-            # AverageMeter需要在每个epoch开始时置0
+            # Reset the meter at the beginning of each epoch.
             avg_meter_loss.reset()
             self.model.train()
             for i, data in enumerate(data_loader):
@@ -100,12 +100,12 @@ class BaseTrainer:
                 else:
                     self.optimizer.step()
 
-                # 每个batch记录一次
+                # Update the running loss once per batch.
                 avg_meter_loss.update(value=loss.item(), n_sample=len(y))
                 if verbose:
                     print(f'\riter {i} | {len(self.data) // self.batch_size}', end='')
 
-            # 获取整个epoch的loss
+            # Compute the average training loss for this epoch.
             loss_train = avg_meter_loss.get_avg()
             self.epoch += 1
 
@@ -114,10 +114,10 @@ class BaseTrainer:
             else:
                 loss_eval = -1
 
-            # 记录当前epoch的训练集 & 验证集loss
+            # Record the training and validation loss of this epoch.
             self.log_manager.update({'epoch': self.epoch, 'loss_train': loss_train, 'loss_eval': loss_eval})
 
-            # 打印最新一个epoch的训练记录
+            # Print the latest training record.
             self.log_manager.print_latest()
 
 

@@ -12,7 +12,7 @@ class CheckPoint():
             # 'optimizer': self.optimizer.state_dict(),
             'log': self.log_manager.log,
         }
-        # 多个optimizer可以以list存储
+        # Multiple optimizers can be stored in a list.
         if isinstance(self.optimizer, list):
             optimizer_states = []
             for i, optim in enumerate(self.optimizer):

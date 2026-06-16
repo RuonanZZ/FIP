@@ -4,7 +4,7 @@ r"""
 
 
 __all__ = ['lerp', 'normalize_tensor', 'append_value', 'append_zero', 'append_one', 'vector_cross_matrix',
-           'vector_cross_matrix_np', 'block_diagonal_matrix_np']
+           'vector_cross_matrix_np', 'block_diagonal_matrix_np', 'linear_interpolation_batch']
 
 
 import numpy as np
@@ -101,3 +101,21 @@ def block_diagonal_matrix_np(matrix2d_list):
         r += lr
         c += lc
     return ret
+
+
+def linear_interpolation_batch(vector1, vector2, target_length):
+    if vector1.size(-1) != vector2.size(-1):
+        raise ValueError("vector1 and vector2 must have the same feature dimension.")
+
+    interpolation_steps = target_length - 1
+    step_size = (vector2 - vector1) / interpolation_steps
+    interpolated_data = [vector1]
+
+    for i in range(1, interpolation_steps):
+        interpolated_point = vector1 + i * step_size
+        interpolated_data.append(interpolated_point)
+
+    interpolated_data.append(vector2)
+    interpolated_data = torch.stack(interpolated_data, dim=1)
+
+    return interpolated_data

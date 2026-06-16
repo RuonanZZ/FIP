@@ -8,12 +8,12 @@ seq_len = 128
 use_elbow_angle = True
 batch_size = 512
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# 数据集准备
+# Prepare the dataset
 train_data = AmassData.load_data(folder_path='E:\DATA\processed_AMASS', use_elbow_angle=use_elbow_angle, add_noise=True)
 
-data_train = AmassData(x=train_data['x_s1'],
-                       y=train_data['pose_all'],
-                       y2=train_data['joint_upper_body'],
+data_train = AmassData(x=train_data['imu'],
+                       y=train_data['pose'],
+                       y2=train_data['joint'],
                        seq_len=seq_len)
 
 # model

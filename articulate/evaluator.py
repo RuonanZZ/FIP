@@ -13,9 +13,9 @@ from .math import *
 import torch
 
 def mean_vector_length(tensor):
-    # 计算每个向量的模长
+    # Compute the magnitude of each vector.
     vector_lengths = torch.norm(tensor, dim=1)
-    # 返回模长的平均值
+    # Return the average magnitude.
     return torch.mean(vector_lengths)
 
 class BasePoseEvaluator:

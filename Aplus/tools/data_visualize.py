@@ -11,24 +11,25 @@ import matplotlib.transforms as transforms
 
 def confidence_ellipse(x, y, ax, n_std=2.0, facecolor='none', **kwargs):
     """
-    绘制表示数据分布的置信椭圆
-    :param x: 数据的x坐标
-    :param y: 数据的y坐标
-    :param ax: matplotlib的Axes对象
-    :param n_std: 标准差倍数，决定椭圆的大小
-    :param facecolor: 椭圆的颜色
-    :param kwargs: 传递给Ellipse的其他参数
-    :return: 椭圆对象
+    Draw a confidence ellipse that represents the data distribution.
+
+    :param x: X coordinates of the samples.
+    :param y: Y coordinates of the samples.
+    :param ax: Matplotlib Axes object.
+    :param n_std: Number of standard deviations that determines the ellipse size.
+    :param facecolor: Ellipse fill color.
+    :param kwargs: Extra keyword arguments passed to `Ellipse`.
+    :return: The created ellipse object.
     """
     if x.size != y.size:
         raise ValueError("x and y must be the same size")
 
-    # 计算均值和协方差矩阵
+    # Compute the mean and covariance matrix.
     cov = np.cov(x, y)
     mean_x = np.mean(x)
     mean_y = np.mean(y)
 
-    # 计算椭圆的旋转角度和轴的长度
+    # Compute the ellipse rotation and axis lengths.
     eigvals, eigvecs = np.linalg.eigh(cov)
     order = eigvals.argsort()[::-1]
     eigvals, eigvecs = eigvals[order], eigvecs[:, order]
@@ -36,7 +37,7 @@ def confidence_ellipse(x, y, ax, n_std=2.0, facecolor='none', **kwargs):
     theta = np.degrees(np.arctan2(*eigvecs[:, 0][::-1]))
     width, height = 2 * n_std * np.sqrt(eigvals)
 
-    # 直接通过Ellipse的参数绘制置信椭圆
+    # Draw the ellipse directly from the Ellipse parameters.
     ellipse = Ellipse((mean_x, mean_y), width=width, height=height, angle=theta,
                       facecolor=facecolor, **kwargs)
 
@@ -45,30 +46,30 @@ def confidence_ellipse(x, y, ax, n_std=2.0, facecolor='none', **kwargs):
 
 def random_index(data_len:int, sampling_rate=1.0, seed:int=None) -> list:
     """
-    随机采样索引的函数
+    Randomly sample indices from a dataset.
 
-    参数:
-    sample_size (int): 样本数量
-    sampling_rate (float): 采样率，范围在(0, 1]
-    seed (int or None): 随机数生成的种子，如果为None则不设置种子
+    Args:
+        data_len (int): Number of samples.
+        sampling_rate (float): Sampling rate in the range (0, 1].
+        seed (int or None): Random seed. If None, the seed is not fixed.
 
-    返回:
-    list: 随机采样的索引列表
+    Returns:
+        list: Sampled indices.
     """
     if not (0 < sampling_rate <= 1):
-        raise ValueError("采样率必须在(0, 1]范围内")
+        raise ValueError("sampling_rate must be within the range (0, 1].")
 
-    # 设置随机数种子
+    # Set the random seed.
     np.random.seed(seed)
 
-    # 计算需要采样的样本数量
+    # Compute the number of samples to draw.
     num_samples_to_select = int(data_len * sampling_rate)
 
-    # 生成样本索引的随机排列
+    # Generate a random permutation of sample indices.
     all_indices = np.arange(data_len)
     np.random.shuffle(all_indices)
 
-    # 从随机排列的索引中选择需要的数量
+    # Select the requested number of indices.
     selected_indices = all_indices[:num_samples_to_select]
 
     return selected_indices
@@ -109,7 +110,7 @@ class DimensionReducer:
             data or dict of numpy array, depends on input format
         """
         def _process(data, sampling_rate=None, sample_seed=None):
-            # 统一转numpy
+            # Convert inputs to NumPy in a consistent way.
             if isinstance(data, torch.Tensor):
                 data = data.detach().cpu()
                 data = np.array(data)
@@ -168,7 +169,7 @@ class DimensionReducer:
         if self.method == 'tsne':
             raise RuntimeWarning("T-SNE refit everytime called, might result inconsistent representations!")
         def _process(data, sample_rate, sampling_seed):
-            # 统一转numpy
+            # Convert inputs to NumPy in a consistent way.
             if isinstance(data, torch.Tensor):
                 data = data.detach().cpu()
                 data = np.array(data)
@@ -246,34 +247,27 @@ def data_dict_2_df(data_dict: dict, stack_dim=0) -> pd.DataFrame:
 
 def plot_scatter_2d_from_dict(data_dict: dict, add_lines=[], epoch=0):
     """
-    绘制二维散点图，并添加置信椭圆
-
-    参数:
-    data_dict (dict): 包含多个维度为n乘2的numpy数组的字典
-    add_lines (list): 设置要添加点间连线的key, 默认为空
-
-    返回:
-    None
+    Plot a 2D scatter chart and add confidence ellipses.
     """
     plt.figure(figsize=[8, 6])
     plt.rcParams.update({
-        'font.size': 28,  # 字体大小
-        'font.family': 'serif',  # 字体类型
-        'font.serif': ['Times New Roman'],  # 设置 Times New Roman 为全局字体
+        'font.size': 28,  # Font size.
+        'font.family': 'serif',  # Font family.
+        'font.serif': ['Times New Roman'],  # Use Times New Roman globally.
     })
     colors = ['#FFC000', '#7030A0', '#BFBFBF', '#d1b2e0', '#5C50FC']
     markers = ['s', '^', 'p']
     i = 0
 
-    ax = plt.gca()  # 获取当前轴对象
-    ax.set_facecolor('#F0F0F0')  # 设置背景颜色
-    ax.grid(True, which='both', linestyle='--', linewidth=0.5, color='white')  # 添加网格
+    ax = plt.gca()  # Get the current axis.
+    ax.set_facecolor('#F0F0F0')  # Set the background color.
+    ax.grid(True, which='both', linestyle='--', linewidth=0.5, color='white')  # Add grid lines.
 
     for label, data in data_dict.items():
         x, y = data[:, 0], data[:, 1]
         plt.scatter(x, y, label=label, c=colors[i], marker=markers[i])
         
-        # 添加带有半透明填充的置信椭圆
+        # Add a confidence ellipse with semi-transparent fill.
         confidence_ellipse(x, y, ax, n_std=2.0, facecolor=colors[i], edgecolor=colors[i], alpha=0.2, linewidth=5)
         
         if label in add_lines:
@@ -287,13 +281,13 @@ def plot_scatter_2d_from_dict(data_dict: dict, add_lines=[], epoch=0):
     plt.ylabel('Dim2')
     plt.legend(frameon=False, ncol=5, loc='upper center', bbox_to_anchor=(0.5, 1.18))  
     
-    # 设置坐标轴范围和刻度间隔
+    # Set axis ranges and tick intervals.
     plt.ylim((-6, 9))
     plt.xlim((-7, 8))
-    plt.xticks(ticks=[-7, -3, 0, 3, 7])  # 设置x轴刻度
-    plt.yticks(ticks=[-5, 0, 5])  # 设置y轴刻度
+    plt.xticks(ticks=[-7, -3, 0, 3, 7])  # Set x-axis ticks.
+    plt.yticks(ticks=[-5, 0, 5])  # Set y-axis ticks.
 
-    # 去除边框
+    # Hide the axes spines.
     for spine in ax.spines.values():
         spine.set_visible(False)
 
@@ -301,19 +295,12 @@ def plot_scatter_2d_from_dict(data_dict: dict, add_lines=[], epoch=0):
 
 def plot_scatter_3d_from_dict(data_dict: dict, add_lines=[], epoch=1):
     """
-    绘制三维散点图
-
-    参数:
-    data_dict (dict): 包含多个维度为n乘3的numpy数组的字典
-    add_lines (list): 设置要添加点间连线的key, 默认为空
-
-    返回:
-    None
+    Plot a 3D scatter chart.
     """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    # 遍历字典中的每个键值对
+    # Iterate over each entry in the dictionary.
     for label, data in data_dict.items():
         x, y, z = data[:, 0], data[:, 1], data[:, 2]
         ax.scatter(x, y, z, label=label)
@@ -332,16 +319,12 @@ def plot_scatter_3d_from_dict(data_dict: dict, add_lines=[], epoch=1):
 
 def plot_line_chart_from_dict(data_dict: dict, conf_dict=None):
     """
-    绘制字典中多个1维NumPy数组的折线图，使用字典的键作为图例标签。
-
-    参数:
-    - data_dict: 包含多个1维/2维(label+数值) NumPy数组序列的字典。
-    - conf_dict: 包含多个2维(上界+下界) NumPy数组序列的字典, key与data_dict相同。
+    Plot line charts for arrays stored in a dictionary, using keys as legend labels.
     """
-    # 创建一个新的图形
+    # Create a new figure.
     plt.figure()
 
-    # 遍历字典中的数据并绘制折线图
+    # Iterate over the dictionary and draw each line.
     for key, values in data_dict.items():
         if len(values.shape) == 1:
             values = values.reshape(-1, 1)
@@ -354,63 +337,56 @@ def plot_line_chart_from_dict(data_dict: dict, conf_dict=None):
         if conf_dict is not None:
             upper, lower = conf_dict[key][:, 0], conf_dict[key][:, 1]
             plt.fill_between(x, upper, lower, alpha=0.5)
-    # 添加图例
+    # Add the legend.
     plt.legend()
-    # 添加轴标签和标题
+    # Add axis labels and the title.
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.title('Line Chart')
 
-    # 显示图形
+    # Display the figure.
     plt.show()
 
 def plot_histogram_from_dict(data_dict, bins=10):
     """
-    对字典中多个1维NumPy数组的数据进行统计分析，并绘制分布直方图，使用字典的键作为图例标签。
-
-    参数:
-    - data_dict: 包含多个1维NumPy数组的字典。
-    - bins: 直方图的柱数，默认为10。
+    Plot histograms for multiple 1D NumPy arrays stored in a dictionary.
     """
-    # 创建一个新的图形
+    # Create a new figure.
     plt.figure()
 
-    # 遍历字典中的数据并绘制分布直方图
+    # Iterate over the dictionary and draw each histogram.
     for key, values in data_dict.items():
         plt.hist(values, bins=bins, alpha=0.5, label=key)
 
-    # 添加图例
+    # Add the legend.
     plt.legend()
 
-    # 添加轴标签和标题
+    # Add axis labels and the title.
     plt.xlabel('value')
     plt.ylabel('count')
     plt.title('Histogram')
 
-    # 显示图形
+    # Display the figure.
     plt.show()
 
 def plot_box_chart_from_dict(data_dict: dict):
     """
-    对字典中多个1维NumPy数组的数据进行统计分析，绘制箱型图，使用字典的键作为图例标签。
-
-    参数:
-    - data_dict: 包含多个1维NumPy数组的字典。
+    Plot box charts for multiple 1D NumPy arrays stored in a dictionary.
     """
-    # 创建一个新的图形
+    # Create a new figure.
     plt.figure()
     data_values = list(data_dict.values())
     plt.boxplot(data_values, labels=data_dict.keys())
-    # 添加轴标签和标题
+    # Add axis labels and the title.
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.title('Box Plot')
 
-    # 显示图形
+    # Display the figure.
     plt.show()
 
 
-# # ---------以下代码供测试-----------
+# # ---------Example code for testing---------
 # example_data_dict = {
 #     'class_1': np.random.randn(1000, 20),
 #     'class_2': np.random.randn(1000, 20)+1,
@@ -418,11 +394,11 @@ def plot_box_chart_from_dict(data_dict: dict):
 # }
 #
 # dim_reducer = DimensionReducer(dim_origin=20, dim_target=3, method='pca')
-# # 随机采样50%数据, 使用pca进行数据降维, 返回降维后的数据字典
+# # Randomly sample 50% of the data, reduce it with PCA, and return the reduced dictionary.
 # data_dict = dim_reducer.fit_transform(data=example_data_dict, sampling_rate=0.5)
-# # 调用函数绘制三维散点图
+# # Call the helper to draw a 3D scatter plot.
 # plot_scatter_3d_from_dict(data_dict)
-# # 数据字典转换为pandas DataFrame
+# # Convert the data dictionary to a pandas DataFrame.
 # print(data_dict_2_df(data_dict=data_dict, stack_dim=0))
 
 
