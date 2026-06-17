@@ -23,3 +23,15 @@ See [docs/FIP_Dataset.md](./docs/FIP_Dataset.md) for details.
 Some parts of the codebase are adapted from [PIP](https://github.com/Xinyu-Yi/PIP) and [LIP](https://github.com/ZuoCX1996/Loose-Inertial-Poser).
 The synthesized IMU data used in this project are derived from [LIP](https://github.com/ZuoCX1996/Loose-Inertial-Poser).
 The `SMPL_MALE` model can be downloaded from https://smpl.is.tue.mpg.de/.
+
+## Citation
+
+```bibtex
+@inproceedings{zheng2025fip,
+  title={FIP: Endowing Robust Motion Capture on Daily Garment by Fusing Flex and Inertial Sensors},
+  author={Zheng, Ruonan and Fang, Jiawei and Yao, Yuan and Gao, Xiaoxia and Zuo, Chengxu and Guo, Shihui and Luo, Yiyue},
+  booktitle={Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems},
+  pages={1--21},
+  year={2025}
+}
+```
